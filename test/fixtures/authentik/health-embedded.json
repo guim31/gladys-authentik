@@ -1,0 +1,16 @@
+[
+  {
+    "uid": "33ed2648-478f-4d44-a080-c744d6de1fc0",
+    "last_seen": "2026-10-21T06:41:59.388956Z",
+    "version": "2026.8.4",
+    "golang_version": "",
+    "openssl_enabled": false,
+    "openssl_version": "",
+    "fips_enabled": null,
+    "version_should": "2026.8.4",
+    "version_outdated": false,
+    "build_hash": "",
+    "build_hash_should": "",
+    "hostname": "fbb3a6df7060"
+  }
+]

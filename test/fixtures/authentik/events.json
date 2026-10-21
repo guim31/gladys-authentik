@@ -1,0 +1,453 @@
+{
+  "pagination": {
+    "next": 0,
+    "previous": 0,
+    "count": 7,
+    "current": 1,
+    "total_pages": 1,
+    "start_index": 1,
+    "end_index": 7
+  },
+  "results": [
+    {
+      "pk": "6696123c-8b32-48d2-9163-30c36a87c07c",
+      "user": {
+        "pk": 5,
+        "email": "alice@example.com",
+        "username": "alice"
+      },
+      "action": "login",
+      "app": "authentik.events.signals",
+      "context": {
+        "geo": {
+          "lat": 51.5142,
+          "city": "London",
+          "long": -0.0931,
+          "country": "GB",
+          "continent": "EU"
+        },
+        "auth_method": "password",
+        "http_request": {
+          "args": {},
+          "path": "/api/v3/flows/executor/default-authentication-flow/",
+          "method": "GET",
+          "request_id": "3c96ad489bc44d5086b21290d5a5c366",
+          "user_agent": "Mozilla/5.0 test"
+        },
+        "auth_method_args": {
+          "known_device": false
+        }
+      },
+      "client_ip": "81.2.69.142",
+      "created": "2026-10-20T22:08:25.560894Z",
+      "expires": "2027-10-20T22:08:25.559792Z",
+      "brand": {
+        "pk": "d7d62ba2b562442a85a9a9c12ed1121b",
+        "app": "authentik_brands",
+        "name": "Default brand",
+        "model_name": "brand"
+      }
+    },
+    {
+      "pk": "0e2c7fab-6908-4472-8c8f-f9ddd33794ce",
+      "user": {
+        "pk": 5,
+        "email": "alice@example.com",
+        "username": "alice"
+      },
+      "action": "password_set",
+      "app": "authentik.events.signals",
+      "context": {
+        "http_request": {
+          "args": {},
+          "path": "/api/v3/core/users/5/set_password/",
+          "method": "POST",
+          "request_id": "d9ce01ce146449b6abd45b0275ad086c",
+          "user_agent": "test"
+        }
+      },
+      "client_ip": "::ffff:192.0.2.5",
+      "created": "2026-10-20T22:08:22.641444Z",
+      "expires": "2027-10-20T22:08:22.640387Z",
+      "brand": {
+        "pk": "d7d62ba2b562442a85a9a9c12ed1121b",
+        "app": "authentik_brands",
+        "name": "Default brand",
+        "model_name": "brand"
+      }
+    },
+    {
+      "pk": "7624f428-fd29-4ae6-b621-d13d8fc849aa",
+      "user": {
+        "pk": 4,
+        "email": "admin@example.com",
+        "username": "akadmin"
+      },
+      "action": "login",
+      "app": "authentik.events.signals",
+      "context": {
+        "asn": {
+          "asn": 29518,
+          "as_org": "Bredband2 AB",
+          "network": "89.160.0.0/17"
+        },
+        "geo": {
+          "lat": 58.4167,
+          "city": "Linköping",
+          "long": 15.6167,
+          "country": "SE",
+          "continent": "EU"
+        },
+        "auth_method": "password",
+        "http_request": {
+          "args": {},
+          "path": "/api/v3/flows/executor/default-authentication-flow/",
+          "method": "GET",
+          "request_id": "52bdea7785e3462f82e3d2cad8dd0560",
+          "user_agent": "Mozilla/5.0 test"
+        },
+        "auth_method_args": {
+          "known_device": false
+        }
+      },
+      "client_ip": "89.160.20.112",
+      "created": "2026-10-20T22:08:05.626378Z",
+      "expires": "2027-10-20T22:08:05.623681Z",
+      "brand": {
+        "pk": "d7d62ba2b562442a85a9a9c12ed1121b",
+        "app": "authentik_brands",
+        "name": "Default brand",
+        "model_name": "brand"
+      }
+    },
+    {
+      "pk": "395cf792-554a-44be-a4dc-38a7bce3285e",
+      "user": {
+        "pk": null,
+        "email": "nosuchuser",
+        "username": "nosuchuser",
+        "authenticated_as": {
+          "pk": 1,
+          "email": "",
+          "username": "AnonymousUser",
+          "is_anonymous": true
+        }
+      },
+      "action": "login_failed",
+      "app": "authentik.events.signals",
+      "context": {
+        "asn": {
+          "asn": 209,
+          "as_org": null,
+          "network": "216.160.64.0/18"
+        },
+        "geo": {
+          "lat": 47.2513,
+          "city": "Milton",
+          "long": -122.3149,
+          "country": "US",
+          "continent": "NA"
+        },
+        "stage": {
+          "pk": "502a562c7b1a47af959a91b9f61fda0a",
+          "app": "authentik_stages_password",
+          "name": "default-authentication-password",
+          "model_name": "passwordstage"
+        },
+        "password": "********************",
+        "username": "nosuchuser",
+        "http_request": {
+          "args": {},
+          "path": "/api/v3/flows/executor/default-authentication-flow/",
+          "method": "POST",
+          "request_id": "5cc592495b4e4c30bdb1c748b1e0c66a",
+          "user_agent": "Mozilla/5.0 test"
+        }
+      },
+      "client_ip": "216.160.83.56",
+      "created": "2026-10-20T22:06:10.162363Z",
+      "expires": "2027-10-20T22:06:10.158236Z",
+      "brand": {
+        "pk": "d7d62ba2b562442a85a9a9c12ed1121b",
+        "app": "authentik_brands",
+        "name": "Default brand",
+        "model_name": "brand"
+      }
+    },
+    {
+      "pk": "763c4785-f254-4dcd-9f10-98def0727416",
+      "user": {
+        "pk": 4,
+        "email": "admin@example.com",
+        "username": "akadmin"
+      },
+      "action": "login_failed",
+      "app": "authentik.events.signals",
+      "context": {
+        "geo": {
+          "lat": 51.5142,
+          "city": "London",
+          "long": -0.0931,
+          "country": "GB",
+          "continent": "EU"
+        },
+        "stage": {
+          "pk": "502a562c7b1a47af959a91b9f61fda0a",
+          "app": "authentik_stages_password",
+          "name": "default-authentication-password",
+          "model_name": "passwordstage"
+        },
+        "password": "********************",
+        "username": "akadmin",
+        "http_request": {
+          "args": {},
+          "path": "/api/v3/flows/executor/default-authentication-flow/",
+          "method": "POST",
+          "request_id": "1ac2aa392cc44f9aaa96ca588216496d",
+          "user_agent": "Mozilla/5.0 test"
+        }
+      },
+      "client_ip": "81.2.69.142",
+      "created": "2026-10-20T22:06:05.165026Z",
+      "expires": "2027-10-20T22:06:05.156400Z",
+      "brand": {
+        "pk": "d7d62ba2b562442a85a9a9c12ed1121b",
+        "app": "authentik_brands",
+        "name": "Default brand",
+        "model_name": "brand"
+      }
+    },
+    {
+      "pk": "4e11043b-e8db-4cf9-9e82-739d7e8f0e1a",
+      "user": {
+        "pk": 4,
+        "email": "admin@example.com",
+        "username": "akadmin"
+      },
+      "action": "login_failed",
+      "app": "authentik.events.signals",
+      "context": {
+        "geo": {
+          "lat": 51.5142,
+          "city": "London",
+          "long": -0.0931,
+          "country": "GB",
+          "continent": "EU"
+        },
+        "stage": {
+          "pk": "502a562c7b1a47af959a91b9f61fda0a",
+          "app": "authentik_stages_password",
+          "name": "default-authentication-password",
+          "model_name": "passwordstage"
+        },
+        "password": "********************",
+        "username": "akadmin",
+        "http_request": {
+          "args": {},
+          "path": "/api/v3/flows/executor/default-authentication-flow/",
+          "method": "POST",
+          "request_id": "acda882cefb145cfaa23195c7f513cf0",
+          "user_agent": "Mozilla/5.0 test"
+        }
+      },
+      "client_ip": "81.2.69.142",
+      "created": "2026-10-20T22:06:00.912667Z",
+      "expires": "2027-10-20T22:06:00.907717Z",
+      "brand": {
+        "pk": "d7d62ba2b562442a85a9a9c12ed1121b",
+        "app": "authentik_brands",
+        "name": "Default brand",
+        "model_name": "brand"
+      }
+    },
+    {
+      "pk": "85948f60-bc1a-4ee4-a650-464062e789f2",
+      "user": {
+        "pk": 4,
+        "email": "admin@example.com",
+        "username": "akadmin"
+      },
+      "action": "password_set",
+      "app": "authentik.events.signals",
+      "context": {},
+      "client_ip": "255.255.255.255",
+      "created": "2026-10-20T22:02:07.545200Z",
+      "expires": "2027-10-20T22:02:07.544127Z",
+      "brand": {
+        "pk": "daec227623344908ba4457bea8de407e",
+        "app": "authentik_brands",
+        "name": "Brand fallback",
+        "model_name": "brand"
+      }
+    }
+  ],
+  "autocomplete": {
+    "current_model": "authentik_events.event",
+    "models": {
+      "authentik_events.event": {
+        "action": {
+          "type": "str",
+          "nullable": false,
+          "options": [
+            "login",
+            "login_failed",
+            "logout",
+            "user_write",
+            "user_offboarded",
+            "suspicious_request",
+            "password_set",
+            "secret_view",
+            "secret_rotate",
+            "invitation_used",
+            "authorize_application",
+            "source_linked",
+            "impersonation_started",
+            "impersonation_ended",
+            "flow_execution",
+            "policy_execution",
+            "policy_exception",
+            "property_mapping_exception",
+            "system_task_execution",
+            "system_task_exception",
+            "system_exception",
+            "configuration_error",
+            "configuration_warning",
+            "model_created",
+            "model_updated",
+            "model_deleted",
+            "email_sent",
+            "update_available",
+            "export_ready",
+            "review_initiated",
+            "review_overdue",
+            "review_attested",
+            "review_completed",
+            "access_request_created",
+            "access_request_approved",
+            "access_request_denied",
+            "access_request_revoked",
+            "custom_"
+          ]
+        },
+        "event_uuid": {
+          "type": "str",
+          "nullable": false,
+          "options": null
+        },
+        "app": {
+          "type": "str",
+          "nullable": false,
+          "options": [
+            "authentik.core.api.tokens",
+            "authentik.events.middleware",
+            "authentik.events.models",
+            "authentik.events.signals"
+          ]
+        },
+        "client_ip": {
+          "type": "str",
+          "nullable": false,
+          "options": null
+        },
+        "user": {
+          "type": "relation",
+          "nullable": false,
+          "options": null,
+          "relation": "authentik_events.event_user"
+        },
+        "brand": {
+          "type": "relation",
+          "nullable": false,
+          "options": null,
+          "relation": "authentik_events.event_brand"
+        },
+        "context": {
+          "type": "relation",
+          "nullable": false,
+          "options": null,
+          "relation": "authentik_events.event_context"
+        },
+        "created": {
+          "type": "datetime",
+          "nullable": false,
+          "options": []
+        }
+      },
+      "authentik_events.event_user": {
+        "pk": {
+          "type": "int",
+          "nullable": false,
+          "options": null
+        },
+        "username": {
+          "type": "str",
+          "nullable": false,
+          "options": null
+        },
+        "email": {
+          "type": "str",
+          "nullable": false,
+          "options": null
+        }
+      },
+      "authentik_events.event_brand": {
+        "pk": {
+          "type": "str",
+          "nullable": false,
+          "options": null
+        },
+        "app": {
+          "type": "str",
+          "nullable": false,
+          "options": null
+        },
+        "name": {
+          "type": "str",
+          "nullable": false,
+          "options": null
+        },
+        "model_name": {
+          "type": "str",
+          "nullable": false,
+          "options": null
+        }
+      },
+      "authentik_events.event_context": {
+        "http_request": {
+          "type": "relation",
+          "nullable": false,
+          "options": null,
+          "relation": "authentik_events.event_context_http_request"
+        }
+      },
+      "authentik_events.event_context_http_request": {
+        "args": {
+          "type": "relation",
+          "nullable": false,
+          "options": null,
+          "relation": "authentik_events.event_context_http_request_args"
+        },
+        "path": {
+          "type": "str",
+          "nullable": false,
+          "options": null
+        },
+        "method": {
+          "type": "str",
+          "nullable": false,
+          "options": null
+        },
+        "request_id": {
+          "type": "str",
+          "nullable": false,
+          "options": null
+        },
+        "user_agent": {
+          "type": "str",
+          "nullable": false,
+          "options": null
+        }
+      }
+    }
+  }
+}
