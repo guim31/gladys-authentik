@@ -10,6 +10,8 @@ the notes of the version's GitHub Release.
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-10-21
+
 ### Added
 
 - An "authentik" device: reachable, failed logins over 1 hour and 24 hours,
@@ -26,3 +28,6 @@ the notes of the version's GitHub Release.
 - "Test the connection" action. Read-only API token; nothing announced twice
   across restarts.
 - Texts and documentation in English, French, German and Spanish.
+
+[Unreleased]: https://github.com/guim31/gladys-authentik/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/guim31/gladys-authentik/releases/tag/v1.0.0
