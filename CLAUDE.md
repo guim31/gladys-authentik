@@ -31,16 +31,20 @@ pushing.
 ## Architecture
 
 ```
-index.js                          SDK wiring only: handlers registered before connect()
-src/devices/index.js              registry of the device blueprints + dispatch helpers
-src/devices/<type>.js             one device type per file (buildDevice, onPoll, onSetValue...)
-src/scenes.js                     scene action handlers (manifest `scene_actions`)
-src/widgets.js                    dashboard widget handlers (manifest `widgets`)
+index.js                          SDK wiring only (src/app.js), connect()
+src/app.js                        registers every handler on the SDK (or the fake Gladys)
+src/hub.js                        reading loop, cursor, scene events, states, connection status
+src/authentik/client.js           authentik API v3 client (events, users, version, outposts)
+src/devices.js                    the "authentik" device: features, names, values
+src/scenes.js                     scene action handler (manifest `scene_actions`)
+src/widgets.js                    dashboard widget handler (manifest `widgets`)
+src/texts.js                      four-language messages (status, errors, report)
 src/config.js                     DEFAULT_CONFIG (mirrors the manifest defaults) + normalization
-src/weather.js                    example driver (Open-Meteo)
-gladys-assistant-integration.json manifest: name, config_schema, actions, image...
-docs/en.md, docs/fr.md            user documentation, re-hosted by Gladys (mandatory)
-test/                             node --test, against the SDK's fake Gladys (integration-sdk/testing)
+src/store.js, src/problems.js     /data persistence, once-per-problem logging
+gladys-assistant-integration.json manifest: name, config_schema, triggers, actions, widget...
+docs/{en,fr,de,es}.md             user documentation, re-hosted by Gladys (mandatory)
+test/                             node --test, against the SDK's fake Gladys and a fake authentik
+test/fixtures/authentik/          real answers of authentik 2026.8.4
 .github/scripts/release.mjs       release helpers (manifest bump, changelog), tested in test/
 ```
 
@@ -70,8 +74,9 @@ test/                             node --test, against the SDK's fake Gladys (in
   `type: "provider"`: 5.1.0). `test/manifest.test.js` ties the manifest to the
   code (defaults, action, scene and widget handlers): change both sides
   together.
-- **User-facing text** is bilingual (English and French): action messages,
-  manifest texts, and `docs/en.md` / `docs/fr.md`, kept in sync.
+- **User-facing text** exists in English, French, German and Spanish: action
+  messages, manifest texts, widget texts and `docs/{en,fr,de,es}.md`, kept in
+  sync (`test/i18n.test.js`).
 - **Style.** Prettier formats, ESLint catches mistakes. Comments explain why,
   in English. Tests never touch the network.
 
@@ -197,6 +202,30 @@ code de ce dépôt. Compléter ce fichier quand un nouveau piège est découvert
 - Les filtres de scène ne font qu'égalité et appartenance : un seuil reste le travail d'un capteur.
 - **Les clés de widgets, de déclencheurs et d'actions sont figées une fois publiées.**
 - `gladys_version` `>=5.1.0` dès qu'il y a widgets, déclencheurs ou actions de scène.
+
+## authentik (API v3, vérifié sur 2026.8.4 en Docker)
+
+- **Jeton** : celui que crée « Nouveau compte de service » est un mot de passe d'application (intention
+  `app_password`) : l'API le refuse en **403 « Token invalid/expired »**, pas en 401. Il faut un jeton
+  d'intention `api` pour le compte. Le client classe ce 403 en erreur de jeton.
+- **Permissions** du rôle du compte : `authentik_events.view_event`, `authentik_core.view_user`,
+  `authentik_outposts.view_outpost`. `admin/version/` n'en demande aucune ; `admin/system/` en demande une
+  autre (et expose les en-têtes HTTP) : pas utilisé.
+- `events/events/` n'a **aucun filtre de date** (`created__gte` n'existe pas) : lecture par pages
+  `ordering=-created` jusqu'à un événement déjà vu (recouvrement de 2 min, dédoublonné par `pk`).
+  Le filtre multiple `actions=a&actions=b` existe. `events/events/volume/` rend `[]` sur une instance neuve.
+- Un `login_failed` d'un compte inconnu a `user.pk: null` et le nom tapé dans `user.username` et
+  `context.username`. `context.geo` (`country`, `city`, `continent`, `lat`, `long`) et `context.asn` n'existent
+  qu'avec la GeoIP : les bases de test de MaxMind-DB (`GeoLite2-City-Test.mmdb`, adresses 81.2.69.142 GB,
+  89.160.20.112 SE, 216.160.83.56 US) montées et `AUTHENTIK_EVENTS__CONTEXT_PROCESSORS__GEOIP` suffisent.
+- `client_ip` suit `X-Forwarded-For` depuis les plages privées (proxies de confiance par défaut) : c'est
+  ainsi que les tests ont simulé des pays.
+- Santé d'un avant-poste : `outposts/instances/{uuid}/health/` rend une entrée par instance connectée, `[]`
+  sinon (un avant-poste LDAP créé sans conteneur). L'avant-poste intégré compte.
+- Flux d'authentification par l'API : chaque `POST` sur `flows/executor/<slug>/` répond **302 vers le
+  même `GET`**, qu'il faut suivre avec les cookies pour lire l'étape suivante.
+- Depuis 2025.10, plus de Redis : le `docker-compose` officiel n'a que PostgreSQL, `server` et `worker`.
+  Premier démarrage (migrations) : 5 à 10 minutes. `AUTHENTIK_BOOTSTRAP_TOKEN` donne un jeton admin de test.
 
 ## Store
 

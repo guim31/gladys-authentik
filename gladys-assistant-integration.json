@@ -1,177 +1,809 @@
 {
   "manifest_version": 1,
   "type": "device",
-  "name": "Demo Devices Template",
+  "name": "authentik",
   "description": {
-    "en": "Starter template showing sensors, a switch, a dimmable light and a smart plug.",
-    "fr": "Template de démarrage : capteurs, interrupteur, lampe variable et prise connectée."
+    "en": "authentik in Gladys: failed logins, logins from unusual countries and outposts down in your scenes.",
+    "fr": "authentik dans Gladys : échecs de connexion, pays inhabituels et avant-postes hors ligne en scènes.",
+    "de": "authentik in Gladys: fehlgeschlagene Anmeldungen, ungewöhnliche Länder und Outposts in Szenen.",
+    "es": "authentik en Gladys: inicios de sesión fallidos, países inusuales y outposts caídos en escenas."
   },
   "version": "1.0.0",
-  "docker_image": "ghcr.io/gladysassistant/integration-template-js:1.0.0",
+  "docker_image": "ghcr.io/guim31/gladys-authentik:1.0.0",
   "gladys_version": ">=5.1.0",
-  "cover_image": "https://raw.githubusercontent.com/GladysAssistant/integration-template-js/master/cover.png",
-  "categories": ["lighting", "security", "environment"],
-  "transports": ["local", "cloud"],
+  "cover_image": "https://raw.githubusercontent.com/guim31/gladys-authentik/main/cover.png",
+  "categories": ["security", "network"],
+  "transports": ["local"],
   "config_schema": [
     {
       "key": "intro",
       "type": "section",
-      "label": { "en": "Getting started", "fr": "Pour commencer" },
+      "label": {
+        "en": "Your authentik server",
+        "fr": "Votre serveur authentik",
+        "de": "Dein authentik-Server",
+        "es": "Su servidor authentik"
+      },
       "description": {
-        "en": "The demo weather station reads real data from the free Open-Meteo API: pick the coordinates to observe. No account, no API key.",
-        "fr": "La station météo de démonstration lit de vraies données via l'API gratuite Open-Meteo : choisissez les coordonnées à observer. Pas de compte, pas de clé d'API."
+        "en": "In authentik, create a service account, a role with the permissions view_event, view_user and view_outpost, and a token with the API intent. The guide shows every step.",
+        "fr": "Dans authentik, créez un compte de service, un rôle avec les permissions view_event, view_user et view_outpost, et un jeton d'intention API. Le guide montre chaque étape.",
+        "de": "Lege in authentik ein Dienstkonto an, eine Rolle mit den Berechtigungen view_event, view_user und view_outpost und ein Token mit dem Zweck API. Die Anleitung zeigt jeden Schritt.",
+        "es": "En authentik, cree una cuenta de servicio, un rol con los permisos view_event, view_user y view_outpost, y un token con la finalidad API. La guía muestra cada paso."
       },
       "links": [
         {
-          "url": "https://open-meteo.com/en/docs",
-          "label": { "en": "Open-Meteo documentation", "fr": "Documentation Open-Meteo" }
+          "url": "https://github.com/guim31/gladys-authentik/blob/main/docs/en.md",
+          "label": {
+            "en": "Setup guide",
+            "fr": "Guide d'installation",
+            "de": "Einrichtungsanleitung",
+            "es": "Guía de instalación"
+          }
+        },
+        {
+          "url": "https://docs.goauthentik.io/developer-docs/api/",
+          "label": {
+            "en": "authentik API",
+            "fr": "API d'authentik",
+            "de": "authentik-API",
+            "es": "API de authentik"
+          }
         }
       ]
     },
     {
-      "key": "latitude",
-      "type": "number",
-      "label": { "en": "Latitude", "fr": "Latitude" },
-      "description": {
-        "en": "Latitude used for the demo weather sensor.",
-        "fr": "Latitude utilisée par le capteur météo de démonstration."
+      "key": "url",
+      "type": "string",
+      "label": {
+        "en": "Address of authentik",
+        "fr": "Adresse d'authentik",
+        "de": "Adresse von authentik",
+        "es": "Dirección de authentik"
       },
-      "placeholder": { "en": "e.g. 48.8566", "fr": "ex. 48.8566" },
-      "required": true,
-      "default": 48.8566,
-      "min": -90,
-      "max": 90
+      "description": {
+        "en": "The address you open authentik with, or its local address (port 9000 or 9443).",
+        "fr": "L'adresse avec laquelle vous ouvrez authentik, ou son adresse locale (port 9000 ou 9443).",
+        "de": "Die Adresse, mit der du authentik öffnest, oder seine lokale Adresse (Port 9000 oder 9443).",
+        "es": "La dirección con la que abre authentik, o su dirección local (puerto 9000 o 9443)."
+      },
+      "placeholder": {
+        "en": "e.g. https://auth.example.com",
+        "fr": "ex. https://auth.example.com",
+        "de": "z. B. https://auth.example.com",
+        "es": "p. ej. https://auth.example.com"
+      },
+      "required": false
     },
     {
-      "key": "longitude",
-      "type": "number",
-      "label": { "en": "Longitude", "fr": "Longitude" },
-      "description": {
-        "en": "Longitude used for the demo weather sensor.",
-        "fr": "Longitude utilisée par le capteur météo de démonstration."
+      "key": "api_token",
+      "type": "secret",
+      "label": {
+        "en": "API token",
+        "fr": "Jeton d'API",
+        "de": "API-Token",
+        "es": "Token de API"
       },
-      "placeholder": { "en": "e.g. 2.3522", "fr": "ex. 2.3522" },
-      "required": true,
-      "default": 2.3522,
-      "min": -180,
-      "max": 180
+      "description": {
+        "en": "Token of the service account, intent API. Read-only: Gladys changes nothing in authentik.",
+        "fr": "Jeton du compte de service, intention API. Lecture seule : Gladys ne modifie rien dans authentik.",
+        "de": "Token des Dienstkontos, Zweck API. Nur lesend: Gladys ändert nichts in authentik.",
+        "es": "Token de la cuenta de servicio, finalidad API. Solo lectura: Gladys no modifica nada en authentik."
+      },
+      "required": false
     },
     {
-      "key": "unit",
-      "type": "select",
-      "label": { "en": "Temperature unit", "fr": "Unité de température" },
+      "key": "alerts",
+      "type": "section",
+      "label": {
+        "en": "Alerts",
+        "fr": "Alertes",
+        "de": "Alarme",
+        "es": "Alertas"
+      },
+      "description": {
+        "en": "A series of failed logins fires once when this many failures happen within the chosen window. Usual countries: ISO codes (FR, BE…); left empty, the countries of the past logins are learned.",
+        "fr": "Une série d'échecs se déclenche une fois quand ce nombre d'échecs survient dans la fenêtre choisie. Pays habituels : codes ISO (FR, BE…) ; vide, les pays des connexions passées sont appris.",
+        "de": "Eine Serie von Fehlversuchen löst einmal aus, wenn so viele Fehlversuche im gewählten Zeitfenster auftreten. Übliche Länder: ISO-Codes (DE, AT…); leer werden die Länder früherer Anmeldungen gelernt.",
+        "es": "Una serie de fallos se dispara una vez cuando ocurren tantos fallos en la ventana elegida. Países habituales: códigos ISO (ES, FR…); vacío, se aprenden los países de los inicios de sesión pasados."
+      }
+    },
+    {
+      "key": "burst_count",
+      "type": "number",
+      "label": {
+        "en": "Failed logins in a series",
+        "fr": "Échecs pour une série",
+        "de": "Fehlversuche für eine Serie",
+        "es": "Fallos para una serie"
+      },
       "required": false,
-      "default": "celsius",
+      "default": 5,
+      "min": 2,
+      "max": 100
+    },
+    {
+      "key": "burst_window",
+      "type": "select",
+      "label": {
+        "en": "Window of the series",
+        "fr": "Fenêtre de la série",
+        "de": "Zeitfenster der Serie",
+        "es": "Ventana de la serie"
+      },
+      "required": false,
+      "default": "10",
       "options": [
-        { "value": "celsius", "label": { "en": "Celsius", "fr": "Celsius" } },
-        { "value": "fahrenheit", "label": { "en": "Fahrenheit", "fr": "Fahrenheit" } }
+        {
+          "value": "5",
+          "label": { "en": "5 minutes", "fr": "5 minutes", "de": "5 Minuten", "es": "5 minutos" }
+        },
+        {
+          "value": "10",
+          "label": {
+            "en": "10 minutes",
+            "fr": "10 minutes",
+            "de": "10 Minuten",
+            "es": "10 minutos"
+          }
+        },
+        {
+          "value": "15",
+          "label": {
+            "en": "15 minutes",
+            "fr": "15 minutes",
+            "de": "15 Minuten",
+            "es": "15 minutos"
+          }
+        },
+        {
+          "value": "30",
+          "label": {
+            "en": "30 minutes",
+            "fr": "30 minutes",
+            "de": "30 Minuten",
+            "es": "30 minutos"
+          }
+        },
+        {
+          "value": "60",
+          "label": { "en": "1 hour", "fr": "1 heure", "de": "1 Stunde", "es": "1 hora" }
+        }
       ]
     },
     {
-      "key": "poll_frequency",
-      "type": "number",
-      "label": { "en": "Refresh interval (s)", "fr": "Intervalle de rafraîchissement (s)" },
+      "key": "usual_countries",
+      "type": "string",
+      "label": {
+        "en": "Usual countries",
+        "fr": "Pays habituels",
+        "de": "Übliche Länder",
+        "es": "Países habituales"
+      },
       "description": {
-        "en": "How often sensors are polled, in seconds (one minute minimum).",
-        "fr": "Fréquence d'interrogation des capteurs, en secondes (une minute minimum)."
+        "en": "Needs GeoIP in authentik. Empty: learned from the logins.",
+        "fr": "Demande la GeoIP dans authentik. Vide : appris des connexions.",
+        "de": "Braucht GeoIP in authentik. Leer: aus den Anmeldungen gelernt.",
+        "es": "Requiere GeoIP en authentik. Vacío: aprendido de los inicios de sesión."
+      },
+      "placeholder": {
+        "en": "e.g. FR, BE",
+        "fr": "ex. FR, BE",
+        "de": "z. B. DE, AT",
+        "es": "p. ej. ES, FR"
+      },
+      "required": false
+    },
+    {
+      "key": "options",
+      "type": "section",
+      "label": {
+        "en": "Options",
+        "fr": "Options",
+        "de": "Optionen",
+        "es": "Opciones"
+      }
+    },
+    {
+      "key": "poll_interval",
+      "type": "select",
+      "label": {
+        "en": "Refresh interval",
+        "fr": "Intervalle de rafraîchissement",
+        "de": "Aktualisierungsintervall",
+        "es": "Intervalo de actualización"
+      },
+      "description": {
+        "en": "How often authentik is read: only the new events.",
+        "fr": "Fréquence de lecture d'authentik : seulement les nouveaux événements.",
+        "de": "Wie oft authentik gelesen wird: nur die neuen Ereignisse.",
+        "es": "Frecuencia de lectura de authentik: solo los eventos nuevos."
       },
       "required": false,
-      "default": 300,
-      "min": 60,
-      "max": 3600
+      "default": "60",
+      "options": [
+        {
+          "value": "30",
+          "label": {
+            "en": "30 seconds",
+            "fr": "30 secondes",
+            "de": "30 Sekunden",
+            "es": "30 segundos"
+          }
+        },
+        {
+          "value": "60",
+          "label": { "en": "1 minute", "fr": "1 minute", "de": "1 Minute", "es": "1 minuto" }
+        },
+        {
+          "value": "120",
+          "label": { "en": "2 minutes", "fr": "2 minutes", "de": "2 Minuten", "es": "2 minutos" }
+        },
+        {
+          "value": "300",
+          "label": { "en": "5 minutes", "fr": "5 minutes", "de": "5 Minuten", "es": "5 minutos" }
+        }
+      ]
+    },
+    {
+      "key": "language",
+      "type": "select",
+      "label": {
+        "en": "Language of the names",
+        "fr": "Langue des noms",
+        "de": "Sprache der Namen",
+        "es": "Idioma de los nombres"
+      },
+      "description": {
+        "en": "Language of the feature names (set when the device is added) and of the scene results.",
+        "fr": "Langue des noms de fonctionnalités (fixés à l'ajout de l'appareil) et des résultats de scène.",
+        "de": "Sprache der Funktionsnamen (beim Hinzufügen des Geräts festgelegt) und der Szenenergebnisse.",
+        "es": "Idioma de los nombres de funciones (fijados al añadir el dispositivo) y de los resultados de escena."
+      },
+      "required": false,
+      "default": "fr",
+      "options": [
+        {
+          "value": "en",
+          "label": { "en": "English", "fr": "Anglais", "de": "Englisch", "es": "Inglés" }
+        },
+        {
+          "value": "fr",
+          "label": { "en": "French", "fr": "Français", "de": "Französisch", "es": "Francés" }
+        },
+        {
+          "value": "de",
+          "label": { "en": "German", "fr": "Allemand", "de": "Deutsch", "es": "Alemán" }
+        },
+        {
+          "value": "es",
+          "label": { "en": "Spanish", "fr": "Espagnol", "de": "Spanisch", "es": "Español" }
+        }
+      ]
     }
   ],
   "actions": [
     {
-      "key": "test_weather",
-      "label": { "en": "Test the weather provider", "fr": "Tester le fournisseur météo" },
-      "timeout_seconds": 30
-    },
-    {
-      "key": "identify",
-      "label": { "en": "Identify a device", "fr": "Identifier un appareil" },
-      "fields": [
-        {
-          "key": "device",
-          "type": "select",
-          "source": "devices",
-          "label": { "en": "Device", "fr": "Appareil" },
-          "required": true
-        }
-      ]
+      "key": "test_connection",
+      "label": {
+        "en": "Test the connection",
+        "fr": "Tester la connexion",
+        "de": "Verbindung testen",
+        "es": "Probar la conexión"
+      },
+      "timeout_seconds": 60
     }
   ],
   "scene_triggers": [
     {
-      "key": "motion_detected",
-      "label": { "en": "Motion detected", "fr": "Mouvement détecté" },
+      "key": "login_failed",
+      "label": {
+        "en": "Failed login",
+        "fr": "Échec de connexion",
+        "de": "Fehlgeschlagene Anmeldung",
+        "es": "Inicio de sesión fallido"
+      },
       "description": {
-        "en": "A demo motion sensor saw a person or an animal move.",
-        "fr": "Un détecteur de démonstration a vu bouger une personne ou un animal."
+        "en": "Someone typed a wrong password (or an unknown user name) in authentik.",
+        "fr": "Quelqu'un a saisi un mauvais mot de passe (ou un nom d'utilisateur inconnu) dans authentik.",
+        "de": "Jemand hat in authentik ein falsches Passwort (oder einen unbekannten Benutzernamen) eingegeben.",
+        "es": "Alguien ha escrito una contraseña incorrecta (o un nombre de usuario desconocido) en authentik."
       },
       "fields": [
         {
-          "key": "device",
-          "type": "select",
-          "source": "devices",
-          "label": { "en": "Sensor", "fr": "Détecteur" }
+          "key": "username",
+          "type": "string",
+          "label": {
+            "en": "User name (empty: any)",
+            "fr": "Nom d'utilisateur (vide : tous)",
+            "de": "Benutzername (leer: alle)",
+            "es": "Nombre de usuario (vacío: todos)"
+          }
+        }
+      ],
+      "variables": [
+        {
+          "key": "username",
+          "type": "string",
+          "label": {
+            "en": "User name typed",
+            "fr": "Nom d'utilisateur saisi",
+            "de": "Eingegebener Benutzername",
+            "es": "Nombre de usuario escrito"
+          }
         },
         {
-          "key": "target",
+          "key": "ip",
+          "type": "string",
+          "label": {
+            "en": "Address",
+            "fr": "Adresse",
+            "de": "Adresse",
+            "es": "Dirección"
+          }
+        },
+        {
+          "key": "country",
+          "type": "string",
+          "label": {
+            "en": "Country (if known)",
+            "fr": "Pays (si connu)",
+            "de": "Land (falls bekannt)",
+            "es": "País (si se conoce)"
+          }
+        },
+        {
+          "key": "city",
+          "type": "string",
+          "label": {
+            "en": "City (if known)",
+            "fr": "Ville (si connue)",
+            "de": "Stadt (falls bekannt)",
+            "es": "Ciudad (si se conoce)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "login_failures_burst",
+      "label": {
+        "en": "Series of failed logins",
+        "fr": "Série d'échecs de connexion",
+        "de": "Serie fehlgeschlagener Anmeldungen",
+        "es": "Serie de inicios de sesión fallidos"
+      },
+      "description": {
+        "en": "The failed logins reach the number set in the configuration within its window: once per series.",
+        "fr": "Les échecs atteignent le nombre réglé dans la configuration, dans sa fenêtre : une fois par série.",
+        "de": "Die Fehlversuche erreichen die in der Konfiguration eingestellte Zahl in ihrem Zeitfenster: einmal pro Serie.",
+        "es": "Los fallos alcanzan el número fijado en la configuración, dentro de su ventana: una vez por serie."
+      },
+      "variables": [
+        {
+          "key": "count",
+          "type": "number",
+          "label": {
+            "en": "Failed logins in the window",
+            "fr": "Échecs dans la fenêtre",
+            "de": "Fehlversuche im Zeitfenster",
+            "es": "Fallos en la ventana"
+          }
+        },
+        {
+          "key": "window_minutes",
+          "type": "number",
+          "label": {
+            "en": "Window (minutes)",
+            "fr": "Fenêtre (minutes)",
+            "de": "Zeitfenster (Minuten)",
+            "es": "Ventana (minutos)"
+          }
+        },
+        {
+          "key": "usernames",
+          "type": "number",
+          "label": {
+            "en": "Different user names",
+            "fr": "Noms d'utilisateur différents",
+            "de": "Verschiedene Benutzernamen",
+            "es": "Nombres de usuario distintos"
+          }
+        },
+        {
+          "key": "addresses",
+          "type": "number",
+          "label": {
+            "en": "Different addresses",
+            "fr": "Adresses différentes",
+            "de": "Verschiedene Adressen",
+            "es": "Direcciones distintas"
+          }
+        },
+        {
+          "key": "username",
+          "type": "string",
+          "label": {
+            "en": "Latest user name typed",
+            "fr": "Dernier nom d'utilisateur saisi",
+            "de": "Zuletzt eingegebener Benutzername",
+            "es": "Último nombre de usuario escrito"
+          }
+        },
+        {
+          "key": "ip",
+          "type": "string",
+          "label": {
+            "en": "Latest address",
+            "fr": "Dernière adresse",
+            "de": "Letzte Adresse",
+            "es": "Última dirección"
+          }
+        },
+        {
+          "key": "country",
+          "type": "string",
+          "label": {
+            "en": "Latest country (if known)",
+            "fr": "Dernier pays (si connu)",
+            "de": "Letztes Land (falls bekannt)",
+            "es": "Último país (si se conoce)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "login_unusual_country",
+      "label": {
+        "en": "Login from an unusual country",
+        "fr": "Connexion depuis un pays inhabituel",
+        "de": "Anmeldung aus einem ungewöhnlichen Land",
+        "es": "Inicio de sesión desde un país inusual"
+      },
+      "description": {
+        "en": "A successful login comes from a country outside the usual ones (needs GeoIP in authentik).",
+        "fr": "Une connexion réussie vient d'un pays hors des pays habituels (demande la GeoIP dans authentik).",
+        "de": "Eine erfolgreiche Anmeldung kommt aus einem Land außerhalb der üblichen (braucht GeoIP in authentik).",
+        "es": "Un inicio de sesión correcto llega de un país fuera de los habituales (requiere GeoIP en authentik)."
+      },
+      "fields": [
+        {
+          "key": "username",
+          "type": "string",
+          "label": {
+            "en": "User name (empty: any)",
+            "fr": "Nom d'utilisateur (vide : tous)",
+            "de": "Benutzername (leer: alle)",
+            "es": "Nombre de usuario (vacío: todos)"
+          }
+        }
+      ],
+      "variables": [
+        {
+          "key": "username",
+          "type": "string",
+          "label": {
+            "en": "User name",
+            "fr": "Nom d'utilisateur",
+            "de": "Benutzername",
+            "es": "Nombre de usuario"
+          }
+        },
+        {
+          "key": "ip",
+          "type": "string",
+          "label": {
+            "en": "Address",
+            "fr": "Adresse",
+            "de": "Adresse",
+            "es": "Dirección"
+          }
+        },
+        {
+          "key": "country",
+          "type": "string",
+          "label": {
+            "en": "Country",
+            "fr": "Pays",
+            "de": "Land",
+            "es": "País"
+          }
+        },
+        {
+          "key": "city",
+          "type": "string",
+          "label": {
+            "en": "City (if known)",
+            "fr": "Ville (si connue)",
+            "de": "Stadt (falls bekannt)",
+            "es": "Ciudad (si se conoce)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "outpost_offline",
+      "label": {
+        "en": "Outpost offline",
+        "fr": "Avant-poste hors ligne",
+        "de": "Outpost offline",
+        "es": "Outpost fuera de línea"
+      },
+      "description": {
+        "en": "An outpost (proxy, LDAP, RADIUS…) has no connected instance any more: once, until it is back.",
+        "fr": "Un avant-poste (proxy, LDAP, RADIUS…) n'a plus d'instance connectée : une fois, jusqu'à son retour.",
+        "de": "Ein Outpost (Proxy, LDAP, RADIUS…) hat keine verbundene Instanz mehr: einmal, bis er zurück ist.",
+        "es": "Un outpost (proxy, LDAP, RADIUS…) ya no tiene ninguna instancia conectada: una vez, hasta su vuelta."
+      },
+      "fields": [
+        {
+          "key": "outpost",
+          "type": "string",
+          "label": {
+            "en": "Outpost name (empty: any)",
+            "fr": "Nom de l'avant-poste (vide : tous)",
+            "de": "Name des Outposts (leer: alle)",
+            "es": "Nombre del outpost (vacío: todos)"
+          }
+        }
+      ],
+      "variables": [
+        {
+          "key": "outpost",
+          "type": "string",
+          "label": {
+            "en": "Outpost name",
+            "fr": "Nom de l'avant-poste",
+            "de": "Name des Outposts",
+            "es": "Nombre del outpost"
+          }
+        },
+        {
+          "key": "type",
+          "type": "string",
+          "label": {
+            "en": "Type (proxy, ldap, radius…)",
+            "fr": "Type (proxy, ldap, radius…)",
+            "de": "Typ (proxy, ldap, radius…)",
+            "es": "Tipo (proxy, ldap, radius…)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "security_event",
+      "label": {
+        "en": "Security event",
+        "fr": "Événement de sécurité",
+        "de": "Sicherheitsereignis",
+        "es": "Evento de seguridad"
+      },
+      "description": {
+        "en": "authentik records a suspicious request, a password change or an impersonation.",
+        "fr": "authentik enregistre une requête suspecte, un changement de mot de passe ou une usurpation.",
+        "de": "authentik verzeichnet eine verdächtige Anfrage, eine Passwortänderung oder einen Identitätswechsel.",
+        "es": "authentik registra una petición sospechosa, un cambio de contraseña o una suplantación."
+      },
+      "fields": [
+        {
+          "key": "action",
           "type": "multi_select",
-          "label": { "en": "What moved", "fr": "Ce qui a bougé" },
+          "label": {
+            "en": "Event (empty: any)",
+            "fr": "Événement (vide : tous)",
+            "de": "Ereignis (leer: alle)",
+            "es": "Evento (vacío: todos)"
+          },
           "options": [
-            { "value": "person", "label": { "en": "Person", "fr": "Personne" } },
-            { "value": "animal", "label": { "en": "Animal", "fr": "Animal" } }
+            {
+              "value": "suspicious_request",
+              "label": {
+                "en": "Suspicious request",
+                "fr": "Requête suspecte",
+                "de": "Verdächtige Anfrage",
+                "es": "Petición sospechosa"
+              }
+            },
+            {
+              "value": "password_set",
+              "label": {
+                "en": "Password changed",
+                "fr": "Mot de passe changé",
+                "de": "Passwort geändert",
+                "es": "Contraseña cambiada"
+              }
+            },
+            {
+              "value": "impersonation_started",
+              "label": {
+                "en": "Impersonation started",
+                "fr": "Usurpation commencée",
+                "de": "Identitätswechsel begonnen",
+                "es": "Suplantación iniciada"
+              }
+            }
           ]
         }
       ],
       "variables": [
         {
-          "key": "target",
+          "key": "action",
           "type": "string",
-          "label": { "en": "What moved", "fr": "Ce qui a bougé" }
+          "label": {
+            "en": "Event",
+            "fr": "Événement",
+            "de": "Ereignis",
+            "es": "Evento"
+          }
+        },
+        {
+          "key": "username",
+          "type": "string",
+          "label": {
+            "en": "User name",
+            "fr": "Nom d'utilisateur",
+            "de": "Benutzername",
+            "es": "Nombre de usuario"
+          }
+        },
+        {
+          "key": "ip",
+          "type": "string",
+          "label": {
+            "en": "Address",
+            "fr": "Adresse",
+            "de": "Adresse",
+            "es": "Dirección"
+          }
+        },
+        {
+          "key": "country",
+          "type": "string",
+          "label": {
+            "en": "Country (if known)",
+            "fr": "Pays (si connu)",
+            "de": "Land (falls bekannt)",
+            "es": "País (si se conoce)"
+          }
+        },
+        {
+          "key": "city",
+          "type": "string",
+          "label": {
+            "en": "City (if known)",
+            "fr": "Ville (si connue)",
+            "de": "Stadt (falls bekannt)",
+            "es": "Ciudad (si se conoce)"
+          }
+        },
+        {
+          "key": "message",
+          "type": "string",
+          "label": {
+            "en": "Message of authentik",
+            "fr": "Message d'authentik",
+            "de": "Meldung von authentik",
+            "es": "Mensaje de authentik"
+          }
         }
       ]
     }
   ],
   "scene_actions": [
     {
-      "key": "identify_device",
-      "label": { "en": "Identify a device", "fr": "Identifier un appareil" },
-      "description": {
-        "en": "Make a device signal itself (the demo light blinks).",
-        "fr": "Fait se signaler un appareil (la lampe de démonstration clignote)."
+      "key": "get_status",
+      "label": {
+        "en": "State of authentik",
+        "fr": "État d'authentik",
+        "de": "Zustand von authentik",
+        "es": "Estado de authentik"
       },
-      "timeout_seconds": 15,
-      "fields": [
-        {
-          "key": "device",
-          "type": "select",
-          "source": "devices",
-          "label": { "en": "Device", "fr": "Appareil" },
-          "required": true
-        }
-      ],
+      "description": {
+        "en": "Sums up authentik for a message: failed and successful logins, outposts, and a ready-made sentence.",
+        "fr": "Résume authentik pour un message : échecs et connexions, avant-postes, et une phrase toute faite.",
+        "de": "Fasst authentik für eine Nachricht zusammen: Fehlversuche und Anmeldungen, Outposts und ein fertiger Satz.",
+        "es": "Resume authentik para un mensaje: fallos e inicios de sesión, outposts y una frase lista."
+      },
+      "timeout_seconds": 60,
       "outputs": [
         {
-          "key": "signalled",
+          "key": "reachable",
           "type": "boolean",
-          "label": { "en": "Device signalled", "fr": "Appareil signalé" }
+          "label": { "en": "Reachable", "fr": "Joignable", "de": "Erreichbar", "es": "Accesible" }
+        },
+        {
+          "key": "failed_logins_1h",
+          "type": "number",
+          "label": {
+            "en": "Failed logins (1 h)",
+            "fr": "Échecs de connexion (1 h)",
+            "de": "Fehlgeschlagene Anmeldungen (1 h)",
+            "es": "Inicios de sesión fallidos (1 h)"
+          }
+        },
+        {
+          "key": "failed_logins_24h",
+          "type": "number",
+          "label": {
+            "en": "Failed logins (24 h)",
+            "fr": "Échecs de connexion (24 h)",
+            "de": "Fehlgeschlagene Anmeldungen (24 h)",
+            "es": "Inicios de sesión fallidos (24 h)"
+          }
+        },
+        {
+          "key": "logins_24h",
+          "type": "number",
+          "label": {
+            "en": "Logins (24 h)",
+            "fr": "Connexions (24 h)",
+            "de": "Anmeldungen (24 h)",
+            "es": "Inicios de sesión (24 h)"
+          }
+        },
+        {
+          "key": "outposts_online",
+          "type": "number",
+          "label": {
+            "en": "Outposts online",
+            "fr": "Avant-postes en ligne",
+            "de": "Outposts online",
+            "es": "Outposts en línea"
+          }
+        },
+        {
+          "key": "outposts_total",
+          "type": "number",
+          "label": { "en": "Outposts", "fr": "Avant-postes", "de": "Outposts", "es": "Outposts" }
+        },
+        {
+          "key": "version",
+          "type": "string",
+          "label": { "en": "Version", "fr": "Version", "de": "Version", "es": "Versión" }
+        },
+        {
+          "key": "last_failed_username",
+          "type": "string",
+          "label": {
+            "en": "Latest failed user name",
+            "fr": "Dernier nom en échec",
+            "de": "Letzter fehlgeschlagener Name",
+            "es": "Último nombre fallido"
+          }
+        },
+        {
+          "key": "last_failed_ip",
+          "type": "string",
+          "label": {
+            "en": "Latest failed address",
+            "fr": "Dernière adresse en échec",
+            "de": "Letzte fehlgeschlagene Adresse",
+            "es": "Última dirección fallida"
+          }
+        },
+        {
+          "key": "sentence",
+          "type": "string",
+          "label": { "en": "Sentence", "fr": "Phrase", "de": "Satz", "es": "Frase" }
         }
       ]
     }
   ],
   "widgets": [
     {
-      "key": "demo_status",
-      "label": { "en": "Demo status", "fr": "État de la démo" },
-      "description": {
-        "en": "Live temperature and plug power, plug connection and observed location.",
-        "fr": "Température et puissance en direct, connexion de la prise, position observée."
+      "key": "security_events",
+      "label": {
+        "en": "authentik security",
+        "fr": "Sécurité authentik",
+        "de": "authentik-Sicherheit",
+        "es": "Seguridad authentik"
       },
-      "icon": "activity",
-      "action_timeout_seconds": 15
+      "description": {
+        "en": "Failed and successful logins of the day, outposts, and the latest security events.",
+        "fr": "Échecs et connexions du jour, avant-postes, et les derniers événements de sécurité.",
+        "de": "Fehlversuche und Anmeldungen des Tages, Outposts und die letzten Sicherheitsereignisse.",
+        "es": "Fallos e inicios de sesión del día, outposts y los últimos eventos de seguridad."
+      },
+      "icon": "shield",
+      "action_timeout_seconds": 60
     }
   ]
 }
