@@ -31,7 +31,8 @@ export const DEFAULT_CONFIG = {
 
 /**
  * Parse the address typed by the user into a base URL: a bare host or IP
- * (`auth.example.com`, HTTPS by default, the usual way authentik is reached)
+ * (`auth.example.com`, HTTPS by default, the usual way authentik is reached;
+ * HTTP on port 9000)
  * or a full URL. A trailing `/api/v3` or `/if/admin` (copied from the browser)
  * is dropped, any other path kept (authentik behind a sub-path).
  * @param {unknown} raw
@@ -45,7 +46,10 @@ export function parseServerUrl(raw) {
   if (!text) {
     return null;
   }
-  const withScheme = /^[a-z][a-z0-9+.-]*:\/\//i.test(text) ? text : `https://${text}`;
+  // Port 9000 is authentik's plain HTTP port, 9443 its HTTPS one.
+  const withScheme = /^[a-z][a-z0-9+.-]*:\/\//i.test(text)
+    ? text
+    : `${/:9000(\/|$)/.test(text) ? 'http' : 'https'}://${text}`;
   let url;
   try {
     url = new URL(withScheme);

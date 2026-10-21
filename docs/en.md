@@ -148,7 +148,7 @@ integration logs at the info level.
 - **"permission missing for the token"**: the role does not hold `view_event`,
   or the account is not in the role. "outposts not readable" or "users not
   readable" in the test: `view_outpost` or `view_user` is missing.
-- **"certificate refused"**: authentik uses a self-signed certificate. Use its
+- **"TLS refused"**: authentik uses a self-signed certificate, or `https://` was typed for the HTTP port 9000. Use its
   local address in `http://…:9000`, or a trusted certificate.
 - **"no authentik API at this address"**: check the address (the one you open
   the admin interface with, without `/if/admin`).

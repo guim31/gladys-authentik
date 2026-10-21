@@ -224,6 +224,10 @@ code de ce dépôt. Compléter ce fichier quand un nouveau piège est découvert
   sinon (un avant-poste LDAP créé sans conteneur). L'avant-poste intégré compte.
 - Flux d'authentification par l'API : chaque `POST` sur `flows/executor/<slug>/` répond **302 vers le
   même `GET`**, qu'il faut suivre avec les cookies pour lire l'étape suivante.
+- SDK 0.15 : une erreur levée par un gestionnaire (`onConfigUpdated`…) n'est écrite qu'au niveau debug
+  (`_runHandler`) : la journaliser soi-même en `error`.
+- Le curseur est enregistré avant l'envoi des événements de scène : un événement refusé par Gladys
+  (redémarrage, 429) est gardé en mémoire et renvoyé à la lecture suivante (`unsent`).
 - Depuis 2025.10, plus de Redis : le `docker-compose` officiel n'a que PostgreSQL, `server` et `worker`.
   Premier démarrage (migrations) : 5 à 10 minutes. `AUTHENTIK_BOOTSTRAP_TOKEN` donne un jeton admin de test.
 

@@ -157,8 +157,11 @@ async function action(hub, { actionKey }) {
   if (actionKey !== ACTIONS.REFRESH) {
     throw new Error(`Unknown action ${actionKey}`);
   }
+  if (!hub.client) {
+    return { message: hub.connectionStatus().message ?? CONNECTION_TEXT.noUrl };
+  }
   await hub.pollNow();
-  if (hub.error) {
+  if (hub.failing) {
     return { message: ERROR_TEXT[hub.error.kind] };
   }
   return { message: TEXT.refreshed };

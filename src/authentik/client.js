@@ -58,6 +58,11 @@ const TLS_CODES = new Set([
   'UNABLE_TO_GET_ISSUER_CERT_LOCALLY',
   'CERT_HAS_EXPIRED',
   'ERR_TLS_CERT_ALTNAME_INVALID',
+  'CERT_NOT_YET_VALID',
+  // https:// on a plain HTTP port (authentik's 9000).
+  'ERR_SSL_WRONG_VERSION_NUMBER',
+  'ERR_SSL_PACKET_LENGTH_TOO_LONG',
+  'EPROTO',
 ]);
 
 // A page of 100 events with their HTTP context stays far below this.
@@ -135,17 +140,19 @@ export function normalizeEvent(raw) {
   const context = object(raw.context);
   const geo = object(context.geo);
   const user = object(raw.user);
-  // A failed login is made by the anonymous user: the typed name is in the
-  // context. An impersonation names the target user in the context too.
+  // A failed login: the typed name is in the context (and in `user`, even for
+  // an unknown account). The other events name their user, the administrator
+  // for an impersonation.
   const typed = str(context.username, 150);
-  const username = raw.action === 'login_failed' ? typed : str(user.username, 150) || typed || '';
+  const named = str(user.username, 150);
+  const username = raw.action === 'login_failed' ? typed || named : named || typed;
   return {
     pk: raw.pk,
     action: str(raw.action, 64),
     created,
     username: username === 'AnonymousUser' ? '' : username,
     ip: str(raw.client_ip, 64),
-    country: str(geo.country, 8).toUpperCase(),
+    country: /^[A-Za-z]{2}$/.test(geo.country ?? '') ? geo.country.toUpperCase() : '',
     city: str(geo.city, 128),
     message: str(context.message, 200),
   };
@@ -191,6 +198,9 @@ export class AuthentikClient {
         },
       });
     } catch (err) {
+      if (err?.message === 'Response too large') {
+        throw new AuthentikError(ERROR_KINDS.HTTP, `Answer too large on ${path.split('?')[0]}`);
+      }
       const code = err?.cause?.code ?? err?.code;
       if (TLS_CODES.has(code)) {
         throw new AuthentikError(ERROR_KINDS.TLS, `Certificate refused (${code})`);
@@ -311,14 +321,28 @@ export class AuthentikClient {
 
   /** Every outpost with its connected instances. */
   async outposts() {
-    const { results } = await this.page('/outposts/instances/?page_size=100');
     const outposts = [];
-    for (const raw of results) {
-      if (!raw || typeof raw.pk !== 'string') {
-        continue;
+    for (let page = 1; page <= 10; page += 1) {
+      const { results, next } = await this.page(`/outposts/instances/?page_size=100&page=${page}`);
+      for (const raw of results) {
+        if (!raw || typeof raw.pk !== 'string') {
+          continue;
+        }
+        let health;
+        try {
+          health = await this.get(`/outposts/instances/${encodeURIComponent(raw.pk)}/health/`);
+        } catch (err) {
+          // Deleted between the list and its health: skipped.
+          if (err instanceof AuthentikError && err.status === 404) {
+            continue;
+          }
+          throw err;
+        }
+        outposts.push(normalizeOutpost(raw, health));
       }
-      const health = await this.get(`/outposts/instances/${encodeURIComponent(raw.pk)}/health/`);
-      outposts.push(normalizeOutpost(raw, health));
+      if (!next) {
+        break;
+      }
     }
     return outposts;
   }

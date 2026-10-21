@@ -41,6 +41,8 @@ test('the real events are normalized: typed user, address, GeoIP country and cit
 test('the address typed by the user', () => {
   assert.equal(parseServerUrl('auth.example.com'), 'https://auth.example.com');
   assert.equal(parseServerUrl('http://192.0.2.10:9000/'), 'http://192.0.2.10:9000');
+  assert.equal(parseServerUrl('192.0.2.10:9000'), 'http://192.0.2.10:9000');
+  assert.equal(parseServerUrl('192.0.2.10:9443'), 'https://192.0.2.10:9443');
   assert.equal(
     parseServerUrl('https://auth.example.com/if/admin/#/events'),
     'https://auth.example.com',

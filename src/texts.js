@@ -44,10 +44,10 @@ export const ERROR_TEXT = {
     es: 'authentik no responde',
   },
   [ERROR_KINDS.TLS]: {
-    en: 'certificate refused: use a trusted certificate or an http:// address',
-    fr: 'certificat refusé : utilisez un certificat reconnu ou une adresse http://',
-    de: 'Zertifikat abgelehnt: Nutze ein vertrauenswürdiges Zertifikat oder eine http://-Adresse',
-    es: 'certificado rechazado: use un certificado reconocido o una dirección http://',
+    en: 'TLS refused: trusted certificate needed, or http:// (port 9000)',
+    fr: 'TLS refusé : certificat reconnu nécessaire, ou http:// (port 9000)',
+    de: 'TLS abgelehnt: vertrauenswürdiges Zertifikat nötig oder http:// (Port 9000)',
+    es: 'TLS rechazado: hace falta un certificado reconocido, o http:// (puerto 9000)',
   },
   [ERROR_KINDS.AUTH]: {
     en: 'API token refused (expired or deleted?)',

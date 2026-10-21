@@ -117,7 +117,8 @@ test('the scene triggers are the ones the hub fires, with their filters and vari
   // Every trigger once: failures, a login from elsewhere, a password change,
   // an outpost that was online going offline.
   world.authentik.setOnline(LDAP, true);
-  world.clock.advance(60_000);
+  // Past the window of the failures of the fixtures, seen at the first read.
+  world.clock.advance(11 * 60_000);
   await world.hub.pollNow();
   const at = world.clock.time;
   const geo = { country: 'US', city: 'Milton' };

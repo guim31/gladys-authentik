@@ -154,7 +154,7 @@ escriben en los registros de la integración en el nivel info.
 - **«falta un permiso al token»**: el rol no tiene `view_event`, o la cuenta no
   está en el rol. «outposts ilegibles» o «usuarios ilegibles» en la prueba:
   falta `view_outpost` o `view_user`.
-- **«certificado rechazado»**: authentik usa un certificado autofirmado. Use su
+- **«TLS rechazado»**: authentik usa un certificado autofirmado, o se escribió `https://` para el puerto HTTP 9000. Use su
   dirección local en `http://…:9000`, o un certificado reconocido.
 - **«no hay API de authentik en esta dirección»**: compruebe la dirección (la de
   la interfaz de administración, sin `/if/admin`).

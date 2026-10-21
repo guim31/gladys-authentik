@@ -79,6 +79,9 @@ export const READS_BEFORE_OFFLINE = 2;
 // not send hundreds of notifications.
 export const MAX_EVENTS_PER_READ = 10;
 
+// Scene events refused by Gladys kept for the next read, at most.
+export const MAX_UNSENT = 50;
+
 // A country learned from the successful logins is forgotten after this long
 // without a login from it.
 export const COUNTRY_MEMORY_MS = 365 * DAY_MS;
@@ -114,6 +117,8 @@ export class AuthentikHub {
     this.connection = null;
     this.discovered = null;
     this.saved = emptySaved(null);
+    /** @type {Array<[string, object]>} scene events Gladys refused, to send again */
+    this.unsent = [];
     this.pollTimer = null;
     this.stopped = false;
     // What fails again at every cycle (Gladys refusing, the reading loop):
@@ -166,6 +171,9 @@ export class AuthentikHub {
       offline: Array.isArray(saved.offline)
         ? saved.offline.filter((id) => typeof id === 'string')
         : [],
+      outposts: Array.isArray(saved.outposts)
+        ? saved.outposts.filter((id) => typeof id === 'string')
+        : [],
     };
     await this.reconfigure(config);
   }
@@ -195,6 +203,7 @@ export class AuthentikHub {
       // Another server: what was saved about the previous one means nothing.
       if (config.url && this.saved.url !== config.url) {
         this.saved = emptySaved(config.url);
+        this.unsent = [];
       }
     }
     if (languageChanged) {
@@ -290,14 +299,14 @@ export class AuthentikHub {
     if (client !== this.client) {
       return false;
     }
-    const outposts = await this.secondary('outposts', () => client.outposts());
+    const outposts = await this.secondary('outposts', client, () => client.outposts());
     const users =
       this.usersAt === 0 || now - this.usersAt >= this.timings.usersMs
-        ? await this.secondary('users', () => client.userCount())
+        ? await this.secondary('users', client, () => client.userCount())
         : undefined;
     const version =
       this.versionAt === 0 || now - this.versionAt >= this.timings.versionMs
-        ? await this.secondary('version', () => client.version())
+        ? await this.secondary('version', client, () => client.version())
         : undefined;
     if (client !== this.client) {
       return false;
@@ -310,9 +319,12 @@ export class AuthentikHub {
    * of the role) is kept apart, the rest still counts.
    * @returns {Promise<unknown|null>} null on failure
    */
-  async secondary(key, fn) {
+  async secondary(key, client, fn) {
     try {
       const value = await fn();
+      if (client !== this.client) {
+        return null; // a read of the previous client: its news are stale
+      }
       if (this.partial[key]) {
         logger.info(`authentik ${key} can be read again`);
       }
@@ -321,6 +333,9 @@ export class AuthentikHub {
     } catch (err) {
       if (!(err instanceof AuthentikError)) {
         throw err;
+      }
+      if (client !== this.client) {
+        return null;
       }
       if (this.partial[key]?.kind !== err.kind) {
         logger.warn(`authentik ${key}: ${err.message}`);
@@ -427,6 +442,14 @@ export class AuthentikHub {
       }
     };
 
+    // Countries not seen for a year are forgotten before the new logins.
+    for (const [code, at] of Object.entries(saved.countries)) {
+      if (at < now - COUNTRY_MEMORY_MS) {
+        delete saved.countries[code];
+        dirty = true;
+      }
+    }
+
     // Each new event, in the order it happened.
     const loginsByCountry = [...this.events.values()]
       .filter((event) => event.action === 'login' && event.country)
@@ -456,12 +479,6 @@ export class AuthentikHub {
     for (const event of loginsByCountry) {
       dirty = this.learnCountry(event.country, event.created) || dirty;
     }
-    for (const [code, at] of Object.entries(saved.countries)) {
-      if (at < now - COUNTRY_MEMORY_MS) {
-        delete saved.countries[code];
-        dirty = true;
-      }
-    }
 
     // A series of failed logins: once when the count over the window reaches
     // the threshold with a new failure, again only after it fell below.
@@ -469,6 +486,11 @@ export class AuthentikHub {
     const inWindow = [...this.events.values()]
       .filter((event) => event.action === 'login_failed' && event.created >= windowStart)
       .sort((a, b) => a.created - b.created);
+    if (firstRead) {
+      // After a restart, a series already under way was announced before.
+      const freshSet = new Set(fresh);
+      this.burstArmed = inWindow.filter((event) => !freshSet.has(event)).length < config.burstCount;
+    }
     if (inWindow.length < config.burstCount) {
       this.burstArmed = true;
     } else if (this.burstArmed && fresh.some((event) => event.action === 'login_failed')) {
@@ -490,6 +512,7 @@ export class AuthentikHub {
     if (outposts) {
       const before = JSON.stringify(this.outposts);
       const offline = new Set(saved.offline);
+      const seen = new Set(saved.outposts);
       const known = new Set();
       for (const outpost of outposts) {
         known.add(outpost.id);
@@ -500,8 +523,9 @@ export class AuthentikHub {
           }
           continue;
         }
-        if (!initialized) {
-          // Already offline at the very first read: not news.
+        if (!seen.has(outpost.id)) {
+          // Offline the first time it is seen (the very first read, a new
+          // outpost not deployed yet, a permission added later): not news.
           offline.add(outpost.id);
           continue;
         }
@@ -517,6 +541,11 @@ export class AuthentikHub {
         if (!known.has(id)) {
           offline.delete(id); // deleted in authentik
         }
+      }
+      const nextSeen = [...known].sort();
+      if (JSON.stringify(nextSeen) !== JSON.stringify([...seen].sort())) {
+        saved.outposts = nextSeen;
+        dirty = true;
       }
       const nextOffline = [...offline].sort();
       if (JSON.stringify(nextOffline) !== JSON.stringify([...saved.offline].sort())) {
@@ -554,12 +583,20 @@ export class AuthentikHub {
     if (skipped > 0) {
       logger.info(`${skipped} scene event(s) skipped: more than ${MAX_EVENTS_PER_READ} at once`);
     }
-    for (const [key, data] of sceneEvents) {
-      if (client !== this.client) {
-        return false; // reconfigured meanwhile: the old server's news are stale
+    // The cursor is already saved: an event Gladys refused (restarting, 429)
+    // is kept and sent again at the next read.
+    const queue = [...this.unsent, ...sceneEvents];
+    this.unsent = [];
+    for (let i = 0; i < queue.length; i += 1) {
+      if (saved !== this.saved) {
+        return false; // another server meanwhile: the old one's news are stale
       }
+      const [key, data] = queue[i];
       logger.debug(`Scene event ${key}: ${JSON.stringify(data)}`);
-      await this.fire(key, data);
+      if (!(await this.fire(key, data))) {
+        this.unsent = queue.slice(i, i + MAX_UNSENT);
+        break;
+      }
     }
     if (client === this.client) {
       await this.publishStates();
@@ -656,11 +693,15 @@ export class AuthentikHub {
     return this.latestEvents().find((event) => event.action === action) ?? null;
   }
 
+  /** @returns {Promise<boolean>} whether Gladys accepted the event */
   async fire(key, data) {
     try {
       await this.gladys.publishSceneEvent(key, data);
+      this.problems.recover('event', 'Scene events accepted again');
+      return true;
     } catch (err) {
       this.problems.fail('event', `Scene event ${key} refused: ${err.message}`);
+      return false;
     }
   }
 
@@ -862,5 +903,6 @@ function emptySaved(url) {
     recent: [],
     countries: {},
     offline: [],
+    outposts: [],
   };
 }

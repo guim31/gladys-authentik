@@ -155,7 +155,7 @@ nie auf der Info-Stufe in die Protokolle der Integration geschrieben.
 - **„Dem Token fehlt eine Berechtigung“**: Die Rolle hat kein `view_event`, oder
   das Konto ist nicht in der Rolle. „Outposts nicht lesbar“ oder „Benutzer nicht
   lesbar“ im Test: Es fehlt `view_outpost` oder `view_user`.
-- **„Zertifikat abgelehnt“**: authentik nutzt ein selbstsigniertes Zertifikat.
+- **„TLS abgelehnt“**: authentik nutzt ein selbstsigniertes Zertifikat, oder für den HTTP-Port 9000 wurde `https://` eingegeben.
   Nutze seine lokale Adresse mit `http://…:9000` oder ein vertrauenswürdiges
   Zertifikat.
 - **„keine authentik-API unter dieser Adresse“**: Prüfe die Adresse (die der

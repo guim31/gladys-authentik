@@ -430,3 +430,58 @@ test('another address forgets what was saved about the previous server', async (
   assert.equal(world.hub.saved.cursor, 0);
   assert.equal(world.hub.events.size, 0);
 });
+
+test('a scene event Gladys refused is sent again at the next read', async (t) => {
+  const world = await createWorld();
+  t.after(() => world.app.stop());
+  const publish = world.gladys.publishSceneEvent.bind(world.gladys);
+  let refuse = true;
+  world.gladys.publishSceneEvent = async (key, data) => {
+    if (refuse) {
+      throw new Error('Gladys restarting');
+    }
+    return publish(key, data);
+  };
+  await later(world, (at) => world.authentik.add('login_failed', { at, username: 'bob' }));
+  assert.equal(events(world, TRIGGERS.LOGIN_FAILED).length, 0);
+  refuse = false;
+  await later(world);
+  assert.deepEqual(
+    events(world, TRIGGERS.LOGIN_FAILED).map((event) => event.data.username),
+    ['bob'],
+  );
+  await later(world);
+  assert.equal(events(world, TRIGGERS.LOGIN_FAILED).length, 1);
+});
+
+test('a series already announced is not announced again after a restart', async (t) => {
+  const clock = createClock();
+  const authentik = new FakeAuthentik();
+  const config = { burst_count: 4, burst_window: '15' };
+  const first = await createWorld({ clock, authentik, config });
+  await later(first, (at) => authentik.add('login_failed', { at }));
+  assert.equal(events(first, TRIGGERS.LOGIN_FAILURES_BURST).length, 1);
+  await first.app.stop();
+  clock.advance(60_000);
+  authentik.add('login_failed', { at: clock.time - 1000 });
+  const second = await createWorld({ clock, authentik, config, dataDir: first.dataDir });
+  t.after(() => second.app.stop());
+  assert.equal(events(second, TRIGGERS.LOGIN_FAILED).length, 1, 'the failure is news');
+  assert.equal(events(second, TRIGGERS.LOGIN_FAILURES_BURST).length, 0, 'the series is not');
+});
+
+test('a new outpost not deployed yet is not announced offline', async (t) => {
+  const world = await createWorld();
+  t.after(() => world.app.stop());
+  world.authentik.outposts.push({ pk: 'new-outpost', name: 'RADIUS', type: 'radius' });
+  world.authentik.health.set('new-outpost', []);
+  await later(world);
+  await later(world);
+  await later(world);
+  assert.equal(events(world, TRIGGERS.OUTPOST_OFFLINE).length, 0);
+  // Deleted between the list and its health: skipped, the rest still read.
+  world.authentik.health.delete('new-outpost');
+  await later(world);
+  assert.equal(world.hub.outpostCounts().total, 2);
+  assert.equal(world.hub.partial.outposts, null);
+});

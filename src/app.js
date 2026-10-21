@@ -72,7 +72,13 @@ export function registerHandlers(gladys, options = {}) {
 
   gladys.onConfigUpdated(
     whenReady(async (newConfig) => {
-      await hub.reconfigure(normalizeConfig(newConfig));
+      try {
+        await hub.reconfigure(normalizeConfig(newConfig));
+      } catch (err) {
+        // The SDK only logs a handler error at the debug level.
+        logger.error('Applying the new configuration failed', err);
+        throw err;
+      }
     }),
   );
 

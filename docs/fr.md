@@ -157,7 +157,7 @@ jamais écrits dans les logs de l'intégration au niveau info.
   le compte n'est pas dans le rôle. « avant-postes illisibles » ou
   « utilisateurs illisibles » dans le test : il manque `view_outpost` ou
   `view_user`.
-- **« certificat refusé »** : authentik utilise un certificat auto-signé.
+- **« TLS refusé »** : authentik utilise un certificat auto-signé, ou `https://` a été saisi pour le port HTTP 9000.
   Utilisez son adresse locale en `http://…:9000`, ou un certificat reconnu.
 - **« pas d'API authentik à cette adresse »** : vérifiez l'adresse (celle de
   l'interface d'administration, sans `/if/admin`).
