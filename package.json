@@ -1,6 +1,6 @@
 {
   "name": "gladys-authentik",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "authentik (identity provider) in Gladys Assistant: security events as scene triggers, a device and a widget.",
   "type": "module",

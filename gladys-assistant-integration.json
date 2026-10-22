@@ -8,8 +8,8 @@
     "de": "authentik in Gladys: fehlgeschlagene Anmeldungen, ungewöhnliche Länder und Outposts in Szenen.",
     "es": "authentik en Gladys: inicios de sesión fallidos, países inusuales y outposts caídos en escenas."
   },
-  "version": "1.0.0",
-  "docker_image": "ghcr.io/guim31/gladys-authentik:1.0.0",
+  "version": "1.0.1",
+  "docker_image": "ghcr.io/guim31/gladys-authentik:1.0.1",
   "gladys_version": ">=5.1.0",
   "cover_image": "https://raw.githubusercontent.com/guim31/gladys-authentik/main/cover.png",
   "categories": ["security", "network"],
